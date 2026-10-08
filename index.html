@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RailTrack - Railway Ticket Reservation & Management System</title>
+  <meta name="description" content="A professional Railway Ticket Reservation and Seat Management System with real-time coach allocation, waiting list handling, and audit history.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="3" width="16" height="16" rx="2"></rect>
+            <path d="M4 11h16"></path>
+            <path d="M12 3v8"></path>
+            <path d="m8 19-2 3"></path>
+            <path d="m16 19 2 3"></path>
+            <circle cx="8" cy="15" r="1"></circle>
+            <circle cx="16" cy="15" r="1"></circle>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>RailTrack Portal</h1>
+          <span class="badge">Live Operations</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="live-status-pill">
+          <span class="pulse-dot"></span>
+          <span>System Online</span>
+        </div>
+        <button id="btn-reset-demo" class="btn btn-outline" title="Reload sample operational data">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+            <path d="M21 3v5h-5"></path>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+            <path d="M3 21v-5h5"></path>
+          </svg>
+          Reset Demo Data
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Quick Status Overview Cards -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Confirmed Occupancy</span>
+          <span class="stat-tag tag-primary">Coach S1</span>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-confirmed-count">0 / 5</div>
+          <p class="stat-desc">Total confirmed reserved berths</p>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="confirmed-progress" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Standby / Waiting List</span>
+          <span class="stat-tag tag-warning">Auto-Promote</span>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-waiting-count">0</div>
+          <p class="stat-desc">Passengers queued for automatic clearance</p>
+        </div>
+        <div class="queue-indicator" id="queue-status-text">No passengers in waiting queue</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Processed Cancellations</span>
+          <span class="stat-tag tag-purple">Audit Log</span>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-cancelled-count">0</div>
+          <p class="stat-desc">Recently released tickets & records</p>
+        </div>
+        <div class="stack-indicator" id="stack-top-text">No cancellations recorded</div>
+      </div>
+    </section>
+
+    <!-- Train Coach Layout Overview -->
+    <section class="coach-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <h2>Coach S1 - Live Seat Matrix</h2>
+          <span class="section-subtitle">Real-time seat allocation & availability (Capacity: 5 Berths)</span>
+        </div>
+      </div>
+      <div class="coach-container">
+        <div class="engine-head">
+          <span>🚆 ENGINE</span>
+        </div>
+        <div class="seats-grid" id="coach-seats-grid">
+          <!-- Dynamic seat cards (1 to 5) injected here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Two Column Dashboard Layout -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Column: Operations (Booking & Cancellation) -->
+      <div class="column-left">
+        
+        <!-- Booking Card -->
+        <div class="card form-card">
+          <div class="card-header">
+            <div class="card-title-icon icon-booking">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <line x1="19" y1="8" x2="19" y2="14"></line>
+                <line x1="22" y1="11" x2="16" y2="11"></line>
+              </svg>
+            </div>
+            <div>
+              <h3>Book Passenger Ticket</h3>
+              <p class="card-subtext">Issues confirmed seat or allocates to standby queue</p>
+            </div>
+          </div>
+          <form id="booking-form" class="form-body">
+            <div class="form-group">
+              <label for="passenger-name">Passenger Name <span class="required">*</span></label>
+              <input type="text" id="passenger-name" placeholder="e.g. Rahul Sharma" required autocomplete="off">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="passenger-age">Age <span class="required">*</span></label>
+                <input type="number" id="passenger-age" min="1" max="120" placeholder="e.g. 24" required>
+              </div>
+              <div class="form-group">
+                <label for="passenger-gender">Gender</label>
+                <select id="passenger-gender">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="travel-class">Class & Quota</label>
+              <select id="travel-class">
+                <option value="Sleeper (SL)">Sleeper (SL) - General</option>
+                <option value="AC 3 Tier (3A)">AC 3 Tier (3A)</option>
+                <option value="AC 2 Tier (2A)">AC 2 Tier (2A)</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+              Confirm Booking
+            </button>
+          </form>
+        </div>
+
+        <!-- Cancellation Card -->
+        <div class="card form-card">
+          <div class="card-header">
+            <div class="card-title-icon icon-cancel">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+              </svg>
+            </div>
+            <div>
+              <h3>Cancel Ticket</h3>
+              <p class="card-subtext">Processes refund and promotes next standby passenger</p>
+            </div>
+          </div>
+          <form id="cancel-form" class="form-body">
+            <div class="form-group">
+              <label for="cancel-ticket-id">Ticket ID <span class="required">*</span></label>
+              <input type="number" id="cancel-ticket-id" placeholder="e.g. 1001" required>
+            </div>
+            <button type="submit" class="btn btn-danger btn-block">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Process Cancellation
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Live Data Management Pipelines -->
+      <div class="column-right">
+        
+        <!-- 1. Confirmed Passengers Pipeline -->
+        <div class="card visualizer-card">
+          <div class="card-header visualizer-header">
+            <div class="header-left">
+              <div class="card-title-icon icon-linkedlist">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="7" width="6" height="10" rx="1"></rect>
+                  <rect x="16" y="7" width="6" height="10" rx="1"></rect>
+                  <path d="M8 12h8"></path>
+                  <path d="m13 9 3 3-3 3"></path>
+                </svg>
+              </div>
+              <div>
+                <h3>Confirmed Passenger Records</h3>
+                <p class="card-subtext">Active passenger manifests and assigned berth references</p>
+              </div>
+            </div>
+            <span class="count-pill" id="badge-confirmed-count">0 Passengers</span>
+          </div>
+
+          <div class="linked-list-container" id="linked-list-view">
+            <!-- Dynamic Passenger Nodes injected here -->
+          </div>
+        </div>
+
+        <!-- 2. Waiting List Pipeline -->
+        <div class="card visualizer-card">
+          <div class="card-header visualizer-header">
+            <div class="header-left">
+              <div class="card-title-icon icon-queue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+              <div>
+                <h3>Standby & Waiting List</h3>
+                <p class="card-subtext">Sequential priority dispatch &mdash; first in line receives next freed seat</p>
+              </div>
+            </div>
+            <span class="count-pill" id="badge-waiting-count">0 in Standby</span>
+          </div>
+
+          <div class="queue-visualizer-wrapper">
+            <div class="queue-label-bar">
+              <span class="queue-pointer pointer-front">◀ PRIORITY #1 (Next to Allocate)</span>
+              <span class="queue-pointer pointer-rear">STANDBY QUEUE END ▶</span>
+            </div>
+            <div class="queue-container" id="queue-view">
+              <!-- Queue items injected here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Cancellation & Audit History -->
+        <div class="card visualizer-card">
+          <div class="card-header visualizer-header">
+            <div class="header-left">
+              <div class="card-title-icon icon-stack">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m12 2 10 5-10 5-10-5Z"></path>
+                  <path d="m2 12 10 5 10-5"></path>
+                  <path d="m2 17 10 5 10-5"></path>
+                </svg>
+              </div>
+              <div>
+                <h3>Cancellation & Audit History</h3>
+                <p class="card-subtext">Chronological transaction logs with most recent release on top</p>
+              </div>
+            </div>
+            <span class="count-pill" id="badge-cancelled-count">0 Logged</span>
+          </div>
+
+          <div class="stack-visualizer-wrapper">
+            <div class="stack-container" id="stack-view">
+              <!-- Stack frames injected here -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Live Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Professional Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>RailTrack Enterprise Operations &bull; Railway Passenger Management System</p>
+      <span class="footer-tech">Real-time Seat Allocation &bull; Automated Standby Promotion Engine</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
